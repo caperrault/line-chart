@@ -2,6 +2,10 @@
 <meta charset="utf-8">
 <style>
 
+body {
+    background-color: #FFF1E1;
+}
+
 .axis--y path {
   display: none;
 }
@@ -11,14 +15,40 @@
   stroke: lightGrey;
 }
 
+.axis--x path {
+  stroke: #C9C5B7;
+  stroke-width: 2;
+}
+
+.axis--x line {
+  stroke: #C9C5B7;
+}
+
 .line {
   fill: none;
-  stroke: red;
-  stroke-width: 1.5px;
+  stroke: #D0C7BF;
+  stroke-width: 2px;
+}
+
+div.tooltip {
+  width: 250px;
+  height: 100px;
+  position: absolute;
+  text-align: left;
+  color: black;
+  padding: 0;
+  font-size: 10px;
+  font-family: BentonSans, Consolas, courier;
+  background: #FFF8ED;
+  border: 0;
+  pointer-events: none;
+  display: block;
+  font-weight: 450;
+  font-family: "BentonSans";
 }
 
 </style>
-<svg width="960" height="500"></svg>
+<svg width="1200" height="750"></svg>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
 
@@ -40,30 +70,39 @@ var line = d3.line()
     .x(function(d) { return x(d.Date); })
     .y(function(d) { return y(d.AdjClose); });
 
-d3.csv("CATStock.csv", function(d) {
-  d.Date = parseTime(d.Date);
-  d.AdjClose = +d.AdjClose;
-  return d;
-}, function(error, data) {
+var div1 = d3.select("body").append("div")
+     .attr("class", "tooltip")
+     .style("opacity", 0);
+
+d3.csv("CATStock.csv", function(error, data) {
   if (error) throw error;
+
+  data.forEach(function(d) {
+    d.Date = parseTime(d.Date);
+    d.AdjClose = +d.AdjClose;
+//    return d;
+  });
 
   //console.log(data);
 
   x.domain(d3.extent(data, function(d) { return d.Date; }));
-  y.domain([d3.min(data, function(d) { return d.AdjClose; }) - 5, d3.max(data, function(d) { return d.AdjClose; })]);
+  y.domain([d3.min(data, function(d) { return d.AdjClose; }) - 10, d3.max(data, function(d) { return d.AdjClose; }) +10 ]);
 
   var xGroup = g.append("g")
-    //  .attr("class", "axis axis--x")
+      .attr("class", "axis axis--x")
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x)
         .tickPadding(0)
         .tickSizeOuter([0])
+        .tickSizeInner([12])
       //  .tickValues(["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"])
       );
 
   xGroup.selectAll("text")
-    .attr("dx", +30);
-  //  .attr("y", -4);
+    .attr("dx", +width/22)
+    .style("fill", "#7D7B74")
+    .style("font-size", "16px")
+    .style("font-family","BentonSans");
 
   var yGroup = g.append("g")
       .attr("class", "axis axis--y")
@@ -75,20 +114,54 @@ d3.csv("CATStock.csv", function(d) {
 
   yGroup.selectAll("text")
     .attr("x", width-10)
-    .attr("dy", -4);
+    .attr("dy", -4)
+    .style("fill", "#7D7B74")
+    .style("font-size", "16px")
+    .style("font-family","BentonSans");
 
   g.append("path")
       .datum(data)
       .attr("class", "line")
       .attr("d", line);
 
-  // g.selectAll("circle")
-  //   .data(data)
-  //   .enter().append();
-  //
-  //     g.selectAll("circle").attr("cx", 100)
-  //     .attr("cy", 100)
-  //     .attr("r", 5);
+  g.selectAll(".dateCircle")
+    .data(data)
+    .enter().append("circle")
+      .attr("cx", function (d) {return x(d.Date)})
+      .attr("cy", function (d) {return y(d.AdjClose)})
+      .attr("r", 5)
+      .attr("fill", "#B84D66")
+      .attr("display", function(d) {
+        if (d.Notes !== "none") { return "inline"}
+        else {return "none";}
+      })
+
+  g.selectAll(".calloutCircle")
+    .data(data)
+    .enter().append("circle")
+      .attr("cx", function (d) {return x(d.Date)})
+      .attr("cy", function (d) {return y(d.AdjClose)-30})
+      .attr("r", 15)
+      .attr("fill", "#FFF8ED")
+      .attr("stroke", "#B84D66")
+      .attr("stroke-width", 3)
+      .attr("display", function(d) {
+        if (d.Notes !== "none") { return "inline"}
+        else {return "none";}
+      })
+      .style("cursor", "pointer")
+      .on("mouseover", function(d) {
+        var timeFormat = d3.timeFormat("%B %d, 20%y")	;
+        div1.transition().duration(300).style("opacity", 1);
+              div1.html(
+                "<div style=margin-left:10px;margin-top:10px> <div style=float:left> <p style=font-weight:regular;padding-right:10px;font-size:16px;margin-top:0px>" + timeFormat(d.Date) + " </p>"
+              )
+              div1.style("left", (d3.event.pageX) + "px")
+              .style("top", (d3.event.pageY-10) + "px");
+       })
+      .on("mouseout", function () {
+                div1.transition().duration(300).style("opacity", 0);
+                });;
 
 });
 
