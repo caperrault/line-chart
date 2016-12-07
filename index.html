@@ -6,6 +6,19 @@ body {
     background-color: #FFF1E1;
 }
 
+h1 {
+  font-family: "BentonSans";
+  font-weight: normal;
+  margin-left: 50px;
+}
+
+h3 {
+  font-family: "BentonSans";
+  font-weight: normal;
+  margin-left: 50px;
+  color: #7D7B74;
+}
+
 .axis--y path {
   display: none;
 }
@@ -41,11 +54,13 @@ div.tooltip {
   border: 0;
   pointer-events: none;
   display: block;
-  font-weight: 450;
   font-family: "BentonSans";
 }
 
 </style>
+<body>
+<h1> Significant Moments in Caterpillar's Year  </h1>
+<h3> Stock Price ($) </h3>
 <svg width="1200" height="750"></svg>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
@@ -165,3 +180,4 @@ d3.csv("CATStock.csv", function(error, data) {
 });
 
 </script>
+</body>
