@@ -62,7 +62,7 @@ div.tooltip {
 
 </style>
 <body>
-<h2> Significant Moments in Caterpillar's and GE's Year Compared </h1>
+<h2> Significant Moments in Caterpillar's Year  </h1>
 <h3> Share Price ($) </h3>
 <svg width="900" height="550"></svg>
 <script src="https://d3js.org/d3.v4.min.js"></script>
@@ -91,7 +91,7 @@ var div1 = d3.select("body").append("div")
      .attr("class", "tooltip")
      .style("opacity", 0);
 
-d3.csv("CAT_GE_Stock.csv", function(error, data) {
+d3.csv("CATStock.csv", function(error, data) {
   if (error) throw error;
 
   data.forEach(function(d) {
@@ -105,10 +105,6 @@ d3.csv("CAT_GE_Stock.csv", function(error, data) {
   }
 
   data = data.sort(sortByDateAscending);
-
-  // var chart = d3.select("body")
-  //   .append("div")
-  //   .datum(nested);
 
 //  console.log(data);
 
@@ -146,23 +142,10 @@ d3.csv("CAT_GE_Stock.csv", function(error, data) {
     .style("font-size", "12px")
     .style("font-family","BentonSans");
 
-    var nested = d3.nest()
-      .key(function(d) { return d.Company; })
-      .entries(data);
-
-      console.log(nested);
-
-    nested.forEach(function(d) {
-        g.append("path")
-            .attr("class", "line")
-            .attr("d", line(d.values));
-    });
-
-  // g.append("path")
-  //     .data(nested)
-  //     .attr("class", "line")
-  //     .attr("d", line);
-
+  g.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .attr("d", line);
 
   g.selectAll(".dateCircle")
     .data(data)
